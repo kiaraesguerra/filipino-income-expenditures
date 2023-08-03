@@ -3,6 +3,7 @@ import numpy as np
 import geopandas as gpd
 import pandas as pd
 from fuzzywuzzy import process
+from adjustText import adjust_text
 
 
 def bar_chart_regional_average(data, key: list):
@@ -52,7 +53,7 @@ def _r_squared(x, y) -> tuple:
     y_mean = np.mean(y)
     total_sum_of_squares = np.sum((y - y_mean) ** 2)
     residual_sum_of_squares = np.sum((y - _best_fit_line(x, y)[0]) ** 2)
-    r_squared_text = f"r^2 = {1 - (residual_sum_of_squares / total_sum_of_squares):.2f}"
+    r_squared_text = f"R^2 = {1 - (residual_sum_of_squares / total_sum_of_squares):.2f}"
     return 1 - (residual_sum_of_squares / total_sum_of_squares), r_squared_text
 
 
@@ -81,25 +82,57 @@ def regional_average_dependence(data, key):
         color="red",
         label="Best Fit Line",
     )
-    # plt.text(0, 0, best_fit_line_text, horizontalalignment='center', verticalalignment='center', fontsize=12, color='red')
+
+    plt.annotate(
+        best_fit_line_text,
+        xy=(0.5, 0.45),
+        fontsize=12,
+        color="red",
+        xycoords="axes fraction",
+    )
 
     # Calculate R-squared
     r_squared, r_squared_text = _r_squared(
         regional_averages_data["Total Household Income"], regional_averages_data[key]
     )
-    # plt.text(0, 0, r_squared_text, horizontalalignment='center', verticalalignment='center', fontsize=12, color='red')
 
-    # # Add region labels to the data points
-    # for region, income, expenditure in zip(regional_averages.index, regional_averages['Total Household Income'], regional_averages[key]):
-    #     plt.annotate(region, (income, expenditure), textcoords="offset points", xytext=(0,5), ha='center')
+    plt.annotate(
+        r_squared_text,
+        xy=(0.5, 0.4),
+        fontsize=12,
+        color="red",
+        xycoords="axes fraction",
+    )
 
+    texts = []
+    # Add region labels to the data points
+    for region, income, expenditure in zip(
+        regional_averages_data.index,
+        regional_averages_data["Total Household Income"],
+        regional_averages_data[key],
+    ):
+        texts.append(
+            plt.annotate(
+                region.split()[0],
+                (income, expenditure),
+                textcoords="offset points",
+                xytext=(0, 5),
+                ha="center",
+                fontsize=12,
+            )
+        )
+
+    adjust_text(texts, only_move={"points": "y", "texts": "y"})
+
+    plt.show()
 
 
 def get_string_inside_parenthesis(name):
-    inside = name[name.find("(")+1:name.find(")")]
+    inside = name[name.find("(") + 1 : name.find(")")]
     inside = inside.split()
     return inside[0] if len(inside) == 1 else inside[1]
 
+
 def make_map_text(name):
-    text = name.split(' ')
-    return text[1] if name.startswith('Region') else text[0]
+    text = name.split(" ")
+    return text[1] if name.startswith("Region") else text[0]
