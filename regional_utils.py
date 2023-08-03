@@ -40,6 +40,22 @@ def bar_chart_regional_average(data, key: list):
     plt.show()
 
 
+def region_with_min_max_value(data, key):
+    """Return the region with the highest / lowest average value for the given data column."""
+    regional_averages_data = data.groupby("Region").mean()
+    return regional_averages_data[key].idxmax(), regional_averages_data[key].idxmin()
+
+
+def create_dataframe_min_max(data, keys):
+    """Return a dataframe with the highest / lowest average value for the given data column."""
+    max_min = {}
+    for key in keys:
+        max_val, min_val = region_with_min_max_value(data, key)
+        max_min.update({key: [max_val, min_val]})
+
+    return pd.DataFrame(max_min)
+
+
 def _best_fit_line(x, y) -> tuple:
     """Calculate the best fit line for the given data."""
     coefficients = np.polyfit(x, y, 1)
