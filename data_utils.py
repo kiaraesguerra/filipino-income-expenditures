@@ -1,4 +1,15 @@
 import re
+import numpy as np
+
+
+def _remove_income_outlier(data):
+    z_scores = np.abs(
+        (data["Total Household Income"] - data["Total Household Income"].mean())
+        / data["Total Household Income"].std()
+    )
+    threshold = 3
+    outlier_indices = np.where(z_scores > threshold)[0]
+    return data.drop(outlier_indices)
 
 
 def _expenditures_data(data):
