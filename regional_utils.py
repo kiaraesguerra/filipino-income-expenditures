@@ -6,7 +6,7 @@ from fuzzywuzzy import process
 from adjustText import adjust_text
 
 
-def bar_chart_regional_average(data, key: list):
+def bar_chart_regional_average(data, key: str, average: bool = True):
     """
     Plot a bar chart showing the regional average for the specified data column.
 
