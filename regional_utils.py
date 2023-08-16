@@ -6,7 +6,7 @@ from fuzzywuzzy import process
 from adjustText import adjust_text
 
 
-def bar_chart_regional_average(data, key: str, average: bool = True):
+def bar_chart_regional_average(data, key: str):
     """
     Plot a bar chart showing the regional average for the specified data column.
 
@@ -37,6 +37,20 @@ def bar_chart_regional_average(data, key: str, average: bool = True):
     plt.tick_params(size=16)
     plt.xlabel("Region", size=16)
     plt.ylabel("Average " + key)
+    plt.show()
+    
+def stacked_bar(data, key):
+    regional_average_column = data.groupby('Region')[key].value_counts().unstack().reset_index()
+    ax = regional_average_column.plot(kind='bar', stacked=True, figsize=(10, 6))
+    plt.title(key)
+    plt.legend()
+    ax.set_xticklabels([entry.split()[0] for entry in regional_average_column["Region"]],  rotation = 0, ha='right')
+    plt.tick_params(size=16)
+    plt.xlabel("Region", size=16)
+    plt.ylabel('Number', size=16)
+    fig = plt.gcf()
+    fig.set_size_inches(20, 10)
+    ax.grid(False)
     plt.show()
 
 
@@ -143,6 +157,23 @@ def regional_average_dependence(data, key):
     plt.show()
 
 
+def income_expenditure_r_squared(data, key):
+    """Return the region with the highest / lowest average value for the given data column."""
+    regional_averages_data = data.groupby("Region").mean()
+    r_squared =_r_squared(regional_averages_data['Total Household Income'], regional_averages_data[key])
+    
+    return r_squared
+
+def create_dataframe_r_squared(data, keys):
+    """Return a dataframe with the highest / lowest average value for the given data column."""
+    r_squared = {}
+    for key in keys:
+        r_val, _ = income_expenditure_r_squared(data, key)
+        r_squared.update({key: [r_val]})
+
+    return pd.DataFrame(r_squared)
+
+
 def get_string_inside_parenthesis(name):
     inside = name[name.find("(") + 1 : name.find(")")]
     inside = inside.split()
@@ -196,6 +227,23 @@ def choropleth(merged_df, key):
     ax.set_title("PH Administrative Regional Data", fontfamily="helvetica", fontsize=20)
     ax.set_axis_off()
 
+
+
+def householdhead_education_aggregate(data):
+    replacement_dict = {
+        '.*Programs$': 'Degree',
+        '^Grade.*|Elementary Graduate': 'Elementary',
+        '.*College$': 'College Undergrad',
+        '.*High School$|High School Graduate': 'High School',
+        '^Other Programs.*|.*Post Secondary$': 'Post Secondary',
+        'No Grade Completed|Preschool$': 'Pre Elem',
+    }
+
+    # Perform the replacements using regex
+    data['Household Head Highest Grade Completed'] = data['Household Head Highest Grade Completed'].replace(replacement_dict, regex=True)
+    data['Household Head Highest Grade Completed'].unique()
+    
+    return data
 
 # def map_names_clean():
 #     psgg_code = pd.read_csv('map/psgg_codes.csv', dtype=object)
