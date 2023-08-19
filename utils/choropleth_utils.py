@@ -14,7 +14,7 @@ def make_map_text(name):
 
 
 def load_regions_geodataframe():
-    regions_gdf = gpd.GeoDataFrame.from_file("map/ph-regions-2015.shp")
+    regions_gdf = gpd.GeoDataFrame.from_file("data/ph-regions-2015.shp")
     regions_gdf.REGION = regions_gdf.REGION.apply(
         get_string_inside_parenthesis
     )  # Renaming the numbered regions to their numbers

@@ -1,6 +1,6 @@
 import numpy as np
 from adjustText import adjust_text
-from regional_utils import get_best_fit_line, get_r_squared
+from utils.regional_utils import get_best_fit_line, get_r_squared
 import matplotlib.pyplot as plt
 
 
