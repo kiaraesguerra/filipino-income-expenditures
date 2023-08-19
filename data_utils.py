@@ -2,17 +2,7 @@ import re
 import numpy as np
 
 
-def _remove_income_outlier(data):
-    z_scores = np.abs(
-        (data["Total Household Income"] - data["Total Household Income"].mean())
-        / data["Total Household Income"].std()
-    )
-    threshold = 3
-    outlier_indices = np.where(z_scores > threshold)[0]
-    return data.drop(outlier_indices)
-
-
-def _expenditures_data(data):
+def get_expenditures_data(data):
     expenditures_data = data.filter(
         regex=re.compile(r"expenditure", re.IGNORECASE)
     ).columns.tolist()
@@ -20,21 +10,21 @@ def _expenditures_data(data):
     return expenditures_data
 
 
-def _income_data(data):
+def get_income_data(data):
     income_data = data.filter(
         regex=re.compile(r"income", re.IGNORECASE)
     ).columns.tolist()
     return income_data
 
 
-def _householdhead_data(data):
+def get_householdhead_data(data):
     householdhead_data = data.filter(
         regex=re.compile(r"household head", re.IGNORECASE)
     ).columns.tolist()
     return householdhead_data
 
 
-def _appliances_data(data):
+def get_appliances_data(data):
     number_data = data.filter(
         regex=re.compile(r"number", re.IGNORECASE)
     ).columns.tolist()
@@ -44,7 +34,7 @@ def _appliances_data(data):
     return number_data
 
 
-def _property_information(data):
+def get_property_information(data):
     house_data = data.filter(regex=re.compile(r"type", re.IGNORECASE)).columns.tolist()
     house_data_additional = [
         "House Floor Area",
@@ -65,12 +55,43 @@ def _property_information(data):
 
 
 # Data regarding family composition
-def _family_composition(data):
+def get_family_composition(data):
     family_members_data = data.filter(
         regex=re.compile(r"members", re.IGNORECASE)
     ).columns.tolist()
     family_members_data.append("Type of Household")
     return family_members_data
+
+
+def aggregate_householdhead_education(data):
+    replacement_dict = {
+        ".*Programs$": "Degree",
+        "^Grade.*|Elementary Graduate": "Elementary",
+        ".*College$": "College Undergrad",
+        ".*High School$|High School Graduate": "High School",
+        "^Other Programs.*|.*Post Secondary$": "Post Secondary",
+        "No Grade Completed|Preschool$": "Pre Elem",
+    }
+
+    # Perform the replacements using regex
+    data["Household Head Highest Grade Completed"] = data[
+        "Household Head Highest Grade Completed"
+    ].replace(replacement_dict, regex=True)
+    data["Household Head Highest Grade Completed"].unique()
+
+    return data
+
+
+def remove_income_outlier(data):
+    z_scores = np.abs(
+        (data["Total Household Income"] - data["Total Household Income"].mean())
+        / data["Total Household Income"].std()
+    )
+    threshold = 3
+    outlier_indices = np.where(z_scores > threshold)[0]
+    return data.drop(outlier_indices)
+
+
 
 
 # # Checking if all of the columns have been categorized
