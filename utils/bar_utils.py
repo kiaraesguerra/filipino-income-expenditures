@@ -12,6 +12,7 @@ def bar_chart_regional_average(data, key: str):
     """
     # Create a new dataframe with the average values for each region
     regional_average_column = data.groupby("Region")[key].mean().reset_index()
+    national_average = data[key].mean()
 
     # Determine the indices of the highest and lowest values
     highest_idx = regional_average_column[key].idxmax()
@@ -23,24 +24,25 @@ def bar_chart_regional_average(data, key: str):
     colors[lowest_idx] = "red"
 
     # Plot the bar chart
-    plt.figure(figsize=(20, 10))
+    plt.figure(figsize=(10, 5))
     plt.bar(
         [entry.split()[0] for entry in regional_average_column["Region"]],
         regional_average_column[key],
         color=colors,
         alpha=0.5,
     )
+    plt.axhline(y=national_average, color="black", linestyle="--", label="National Average", alpha=0.4)
+    plt.legend()
     plt.tick_params(size=16)
     plt.xlabel("Region", size=16)
     plt.ylabel("Average " + key)
     plt.show()
 
-
 def stacked_bar(data, key):
     regional_average_column = (
         data.groupby("Region")[key].value_counts().unstack().reset_index()
     )
-    ax = regional_average_column.plot(kind="bar", stacked=True, figsize=(10, 6))
+    ax = regional_average_column.plot(kind="bar", stacked=True, figsize=(10, 5))
     plt.title(key)
     plt.legend()
     ax.set_xticklabels(
@@ -52,6 +54,6 @@ def stacked_bar(data, key):
     plt.xlabel("Region", size=16)
     plt.ylabel("Number", size=16)
     fig = plt.gcf()
-    fig.set_size_inches(20, 10)
+    fig.set_size_inches(10, 5)
     ax.grid(False)
     plt.show()

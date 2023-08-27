@@ -1,5 +1,6 @@
 import re
 import numpy as np
+import pandas as pd
 
 
 def get_expenditures_data(data):
@@ -92,7 +93,54 @@ def remove_income_outlier(data):
     return data.drop(outlier_indices)
 
 
+def clean_region_names(data):
+    data["Region"] = [
+        entry.split()[0] for entry in data["Region"]
+    ] 
 
+    # Representing the regions with numbers
+    data['Region'] = data['Region'].replace(' ARMM', 'ARMM')
+    data['Region'] = data['Region'].replace('IVA', 'IV-A')
+    data['Region'] = data['Region'].replace('IVB', 'IV-B')
+    data['Region'] = data['Region'].replace('Caraga', 'XIII')
+    
+    return data
+
+
+def handle_missing_values(data):
+    missing_values_count = data.isnull().sum()
+    print("Columns with Missing Values:")
+    print(missing_values_count[missing_values_count > 0])
+    # Replace missing values in occupation with 'Unemployed'
+    data['Household Head Occupation'] = data['Household Head Occupation'].fillna('Unemployed')
+    data['Household Head Class of Worker'] = data['Household Head Class of Worker'].fillna('Unemployed')
+    data['Toilet Facilities'] = data['Toilet Facilities'].fillna('None')
+
+    return data
+
+def categorize_by_datatype(data):
+
+    categorical_columns = []
+    continuous_columns = []
+    binary_columns = []
+    counting_columns = []
+
+    data = pd.DataFrame(data)
+    data_types = data.dtypes
+
+
+    for column, dtype in data_types.items():
+        if dtype == 'object':
+            categorical_columns.append(column)
+        elif dtype == 'int64':
+            if data[column].nunique() == 2:
+                binary_columns.append(column)
+            elif data[column].nunique() < 10:
+                counting_columns.append(column)
+            else:
+                continuous_columns.append(column)
+                
+    return categorical_columns, continuous_columns, binary_columns, counting_columns
 
 # # Checking if all of the columns have been categorized
 # collection = expenditures_data +  income_data + number_data +  householdhead_data + family_members_data +  house_data

@@ -26,7 +26,27 @@ class ScatterPlotBase:
     def _plot_main_scatter(self):
         plt.scatter(self.x, self.y, s=100, c="blue", alpha=0.7)
         plt.tick_params(axis="both", which="major", labelsize=16)
+        plt.xlabel("Total Household Income", size=16)
+
+    def plot(self):
+        plt.figure(figsize=(10, 5))
+        self._plot_main_scatter()
+        self._plot_best_fit_line()
+        self._plot_r_squared_annotation()
+        plt.show()
+
+
+class ScatterPlotRegional(ScatterPlotBase):
+    def __init__(self, data, key):
+        self.x = data.groupby("Region")["Total Household Income"].mean()
+        self.y = data.groupby("Region")[key].mean()
+        super().__init__(self.x, self.y)
+        
+    def _plot_main_scatter(self):
+        plt.scatter(self.x, self.y, s=100, c="blue", alpha=0.7)
+        plt.tick_params(axis="both", which="major", labelsize=16)
         plt.xlabel("Average Total Household Income", size=16)
+
         # Add region labels to the data points
         texts = [
             plt.annotate(
@@ -40,20 +60,6 @@ class ScatterPlotBase:
             for region, income, expenditure in zip(self.y.index, self.x, self.y)
         ]
         adjust_text(texts, only_move={"points": "y", "texts": "y"})
-
-    def plot(self):
-        plt.figure(figsize=(20, 10))
-        self._plot_main_scatter()
-        self._plot_best_fit_line()
-        self._plot_r_squared_annotation()
-        plt.show()
-
-
-class ScatterPlotRegional(ScatterPlotBase):
-    def __init__(self, data, key):
-        self.x = data.groupby("Region")["Total Household Income"].mean()
-        self.y = data.groupby("Region")[key].mean()
-        super().__init__(self.x, self.y)
         
         
 def regional_scatter_plot(data, key):

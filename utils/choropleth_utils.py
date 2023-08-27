@@ -23,6 +23,22 @@ def load_regions_geodataframe():
     )  # Drop the last row (NIR)
     return regions_gdf_clean
 
+def clean_region_names(data):
+    data["Region"] = [
+        entry.split()[0] for entry in data["Region"]
+    ]  # Representing the regions with numbers
+    data.loc[
+        6, "Region"
+    ] = "IV-A"  # Match the entry in regions_clean
+    data.loc[
+        7, "Region"
+    ] = "IV-B"  # match the entry in regions_clean
+    data.loc[
+        2, "Region"
+    ] = "XIII"  # match the entry in regions_clean
+    return data
+
+
 
 def regional_averages_name_clean(data, keys):
     regional_average_columns = data.groupby("Region")[keys].mean().reset_index()
